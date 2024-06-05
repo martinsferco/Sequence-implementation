@@ -8,6 +8,7 @@ import Arr (Arr, fromList)
 
 
 instance Seq Arr where
+
   emptyS     = emptyArr  
   singletonS = singletonArr
   lengthS    = lengthArr
@@ -72,4 +73,4 @@ scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scanArr = undefined
 
 fromListArr :: [a] -> Arr a
-fromListArr = undefined
+fromListArr = A.fromList

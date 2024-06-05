@@ -5,6 +5,7 @@ import Seq
 
 
 instance Seq [] where
+  
   emptyS     = emptyList
   singletonS = singletonList
   lengthS    = lengthList
@@ -33,34 +34,48 @@ lengthList :: [a] -> Int
 lengthList = length
 
 nthList :: [a] -> Int -> a
-nthList = undefined
+nthList (x:xs) 0 = x
+nthList (x:xs) n = nthList xs (n-1)
 
 tabulateList :: (Int -> a) -> Int -> [a] 
 tabulateList = undefined
 
 mapList :: (a -> b) -> [a] -> [b]
-mapList = undefined 
+mapList = map
 
 filterList :: (a -> Bool) -> [a] -> [a]
-filterList = undefined
+filterList = filter
 
 appendList :: [a] -> [a] -> [a]
-appendList = undefined
+appendList = (++)
 
 takeList :: [a] -> Int -> [a]
-takeList = undefined
+takeList _ 0      = []
+takeList [] _     = []
+takeList (x:xs) n = x : (takeList xs (n-1))
 
 dropList :: [a] -> Int -> [a]
-dropList = undefined
+dropList xs 0     = xs
+dropList [] _     = []
+dropList (x:xs) n = dropList xs (n-1)
 
 showtList :: [a] -> TreeView a ([a])
-showtList = undefined
+showtList []  = EMPTY
+showtList [x] = ELT x
+showtList xs  = let
+                    l = div (lengthList xs) 2 
+                in
+                    NODE (takeList xs l) (dropList xs l)
+
 
 showlList :: [a] -> ListView a ([a])
-showlList = undefined
+showlList [] = NIL
+showlList (x:xs) = CONS x xs
 
 joinList :: [[a]] -> [a]
-joinList = undefined
+joinList [] = []
+joinList [xs] = xs
+joinList (xs:xss) = xs ++ joinList xss
 
 reduceList :: (a -> a -> a) -> a -> [a] -> a
 reduceList = undefined
@@ -69,4 +84,4 @@ scanList :: (a -> a -> a) -> a -> [a] -> ([a], a)
 scanList = undefined
 
 fromListList :: [a] -> [a]
-fromListList = undefined
+fromListList = id
