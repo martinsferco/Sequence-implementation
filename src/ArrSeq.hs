@@ -26,51 +26,80 @@ instance Seq Arr where
   scanS      = scanArr
   fromList   = fromListArr
 
-
+-- * lista
 emptyArr :: Arr a
 emptyArr = A.empty
 
+-- * lista
 singletonArr :: a -> Arr a
 singletonArr x = A.fromList [x]
 
+-- * lista
 lengthArr :: Arr a -> Int
 lengthArr = A.length
 
+-- * lista
 nthArr :: Arr a -> Int -> a
 nthArr ar i = ar ! i
 
+-- * lista
 tabulateArr :: (Int -> a) -> Int -> Arr a 
 tabulateArr = A.tabulate
 
+-- * lista
 mapArr :: (a -> b) -> Arr a -> Arr b
-mapArr = undefined 
+mapArr f ar = tabulateArr (\i -> f (nthArr ar i)) (lengthArr ar)  
 
+-- ? Ver
 filterArr :: (a -> Bool) -> Arr a -> Arr a
 filterArr = undefined
 
+-- * lista
 appendArr :: Arr a -> Arr a -> Arr a
-appendArr = undefined
+appendArr ar1 ar2 = tabulateArr appendAux (lengthArr ar1 + lengthArr ar2)
 
+  where 
+      appendAux i = if i < (lengthArr ar1) then nthArr ar1 i
+                                           else nthArr ar2 (i - lengthArr ar1)
+
+
+
+-- !! corregir
 takeArr :: Arr a -> Int -> Arr a
-takeArr = undefined
+takeArr ar k = A.subArray 0 k ar 
 
+-- !! corregir
 dropArr :: Arr a -> Int -> Arr a
-dropArr = undefined
+dropArr ar k = A.subArray k (lengthArr ar - k) ar 
 
+-- * lista
 showtArr :: Arr a -> TreeView a (Arr a)
-showtArr = undefined
+showtArr ar = case lengthArr ar of
+                  0 -> EMPTY
+                  1 -> ELT (nthArr ar 0)
+                  k -> let
+                          s = div k 2
+                       in
+                          NODE (takeArr ar s) (dropArr ar s)
 
+-- * lista
 showlArr :: Arr a -> ListView a (Arr a)
-showlArr = undefined
+showlArr ar = case lengthArr ar of 
+                  0 -> NIL
+                  k -> CONS (nthArr ar 0) (dropArr ar 1)
 
+-- * lista
 joinArr :: Arr (Arr a) -> Arr a
-joinArr = undefined
+joinArr = A.flatten
 
+-- ? Preguntar por orden de reduccion
 reduceArr :: (a -> a -> a) -> a -> Arr a -> a
 reduceArr = undefined
 
+-- ? Preguntar por orden de reduccion
 scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scanArr = undefined
 
+-- * lista
 fromListArr :: [a] -> Arr a
 fromListArr = A.fromList
