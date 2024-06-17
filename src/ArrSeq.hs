@@ -94,7 +94,15 @@ joinArr = A.flatten
 
 -- ? Preguntar por orden de reduccion
 reduceArr :: (a -> a -> a) -> a -> Arr a -> a
-reduceArr = undefined
+reduceArr op b ar = undefined
+
+reduceArrAux :: (a -> a -> a) -> Arr a -> a
+reduceArrAux op ar | lengthArr ar == 1   = nthArr ar 0
+                   | even (lengthArr ar) = reduceArrAux op (tabulateArr (\i -> op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))) (div (lengthArr ar) 2))
+                   | otherwise           = reduceArrAux op (tabulateArr (\i -> function i) (div (lengthArr ar) 2 + 1))
+
+    where
+      function i = if i /= (div (lengthArr ar) 2 ) then op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1)) else nthArr ar (2 * i)
 
 -- ? Preguntar por orden de reduccion
 scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
