@@ -92,8 +92,9 @@ showtList []  = EMPTY
 showtList [x] = ELT x
 showtList xs  = let
                     l = div (lengthList xs) 2 
+                    (tl, dl) = takeList xs l ||| dropList xs l
                 in
-                    NODE (takeList xs l) (dropList xs l)
+                    NODE tl dl
 
 -- * lista
 showlList :: [a] -> ListView a ([a])
