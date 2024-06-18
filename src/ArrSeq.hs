@@ -50,9 +50,13 @@ tabulateArr = A.tabulate
 mapArr :: (a -> b) -> Arr a -> Arr b
 mapArr f ar = tabulateArr (\i -> f (nthArr ar i)) (lengthArr ar)  
 
--- ? Ver
+-- * lista
 filterArr :: (a -> Bool) -> Arr a -> Arr a
-filterArr = undefined
+filterArr f ar = case showtArr ar of
+                  EMPTY     -> emptyArr
+                  ELT x     -> if f x then singletonArr x else emptyArr
+                  NODE l r  -> let (l', r') = filterArr f l ||| filterArr f r
+                               in  appendArr l' r'
 
 -- * lista
 appendArr :: Arr a -> Arr a -> Arr a
