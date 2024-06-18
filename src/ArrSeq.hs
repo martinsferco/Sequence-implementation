@@ -1,6 +1,7 @@
 module ArrSeq where
 
 import Seq
+import Par 
 
 import qualified Arr as A
 import Arr ((!))
@@ -25,6 +26,7 @@ instance Seq Arr where
   reduceS    = reduceArr
   scanS      = scanArr
   fromList   = fromListArr
+
 
 -- * lista
 emptyArr :: Arr a
@@ -52,19 +54,20 @@ mapArr f ar = tabulateArr (\i -> f (nthArr ar i)) (lengthArr ar)
 
 -- * lista
 filterArr :: (a -> Bool) -> Arr a -> Arr a
-filterArr f ar = case showtArr ar of
+filterArr p ar = case showtArr ar of
                   EMPTY     -> emptyArr
-                  ELT x     -> if f x then singletonArr x else emptyArr
-                  NODE l r  -> let (l', r') = filterArr f l ||| filterArr f r
+                  ELT x     -> if p x then singletonArr x else emptyArr
+                  NODE l r  -> let (l', r') = filterArr p l ||| filterArr p r
                                in  appendArr l' r'
 
 -- * lista
 appendArr :: Arr a -> Arr a -> Arr a
-appendArr ar1 ar2 = tabulateArr appendAux (lengthArr ar1 + lengthArr ar2)
+appendArr ar1 ar2 = tabulateArr appendAux (l1 + l2)
 
   where 
-      appendAux i = if i < (lengthArr ar1) then nthArr ar1 i
-                                           else nthArr ar2 (i - lengthArr ar1)
+      (l1, l2) = (lengthArr ar1, lengthArr ar2)
+      appendAux i = if i < l1 then nthArr ar1 i
+                              else nthArr ar2 (i - l1)
 
 
 
@@ -96,7 +99,6 @@ showlArr ar = case lengthArr ar of
 joinArr :: Arr (Arr a) -> Arr a
 joinArr = A.flatten
 
--- ? Preguntar por orden de reduccion
 reduceArr :: (a -> a -> a) -> a -> Arr a -> a
 reduceArr op b ar = undefined
 
