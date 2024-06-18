@@ -112,7 +112,41 @@ reduceArrAux op ar | lengthArr ar == 1   = nthArr ar 0
 
 -- ? Preguntar por orden de reduccion
 scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
-scanArr = undefined
+scanArr op b s = case lengthArr s of 
+                 0    -> (emptyArr, b)
+                 1    -> (singletonArr b, op b (nthArr s 0))
+                 slen -> let
+                            -- Me quedo con la mitad de los indices
+                            idxArr = tabulateArr id (div slen 2)
+
+                            -- Defino la operacion de contraccion a aplicar sobre esos indices
+                            contraccion i = op (nthArr s (2 * i)) (nthArr s (2 * i + 1))
+                            arrContraido = mapArr contraccion idxArr
+
+                            -- Llamo recursivamente a scan sobre el array contraido y lo uno en s'
+                            (ss, sr) = scanArr op b arrContraido
+                            s' = appendArr ss (singletonArr sr)
+
+                            -- Genero un array de indices a partir del cual construyo el resultado con expansion
+                            rIdx = tabulateArr id (slen + 1)
+                            expansion i = if even i then nthArr s' (div i 2)
+                                                    else op (nthArr s' (div i 2)) (nthArr s (i - 1))
+
+                            r = mapArr expansion rIdx
+                          
+                          in 
+                            -- Separo el resultado final en dos acorde a la especificacion de scan.
+                            (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1))
+
+concatStrings :: String -> String -> String
+concatStrings "b" b = "b" ++ " + " ++ b
+concatStrings a b = "(" ++ a ++ " + " ++ b ++ ")"
+
+ejemploSeq :: Arr String
+ejemploSeq = fromListArr ["x0", "x1", "x2", "x3", "x4", "x5"]
+
+ejemploInts :: Arr Int
+ejemploInts = fromListArr [1, 2, 3, 4, 5, 6]
 
 -- * lista
 fromListArr :: [a] -> Arr a
