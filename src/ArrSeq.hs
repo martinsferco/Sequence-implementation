@@ -6,6 +6,7 @@ import Par
 import qualified Arr as A
 import Arr ((!))
 import Arr (Arr, fromList) 
+import Data.List (singleton)
 
 
 instance Seq Arr where
@@ -100,19 +101,48 @@ joinArr :: Arr (Arr a) -> Arr a
 joinArr = A.flatten
 
 reduceArr :: (a -> a -> a) -> a -> Arr a -> a
-reduceArr op b ar = undefined
+reduceArr op b ar = if lengthArr ar == 0 then b else op b (reduceArrAux op ar)
+
 
 reduceArrAux :: (a -> a -> a) -> Arr a -> a
-reduceArrAux op ar | lengthArr ar == 1   = nthArr ar 0
-                   | even (lengthArr ar) = reduceArrAux op (tabulateArr (\i -> op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))) (div (lengthArr ar) 2))
-                   | otherwise           = reduceArrAux op (tabulateArr (\i -> function i) (div (lengthArr ar) 2 + 1))
+reduceArrAux op ar | l == 1    = nthArr ar 0
+                   | otherwise = reduceArrAux op (contract op ar)
 
+                   where l = lengthArr ar
+
+contract :: (a -> a -> a) -> Arr a -> Arr a
+contract op ar | even l    = tabulateArr (\i -> opi i) (div l 2)
+               | otherwise = tabulateArr (\i -> function i) (div l 2 + 1)
+    
     where
-      function i = if i /= (div (lengthArr ar) 2 ) then op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1)) else nthArr ar (2 * i)
+      opi i = op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))   
+      l = lengthArr ar
+      function i = if i /= div l 2  then opi i
+                                    else nthArr ar (2 * i)
 
--- ? Preguntar por orden de reduccion
+
+
+
+
 scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
-scanArr = undefined
+scanArr op b s | lengthArr s == 0 = (emptyArr,b) 
+               | lengthArr s == 1 = (singletonArr b, op b (nthArr s 0))
+               | otherwise         = let
+                                        sc         = contract op s
+                                        (ss, ts)  = scanArr op b sc
+                                        s'        = appendArr ss (singletonArr ts)
+                                        expand i  = if even i then nthArr s' (div i 2) else op (nthArr s' (div i 2)) (nthArr s (i - 1))
+                                        r         = tabulateArr expand (lengthArr s + 1)
+                                      in
+                                        (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1))
+
+
+s = fromListArr ["s0","s1","s2","s3","s4","s5"]
+
+b = "b"
+op n m = "(" ++ n ++ "+" ++ m ++ ")"
+
+
 
 -- * lista
 fromListArr :: [a] -> Arr a
