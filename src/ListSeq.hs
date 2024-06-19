@@ -103,20 +103,75 @@ joinList [] = []
 joinList [xs] = xs
 joinList (xs:xss) = appendList xs (joinList xss)
 
-
-
 reduceList :: (a -> a -> a) -> a -> [a] -> a
 reduceList op b [] = b
-reduceList op b xs = op b (reduceListAux op xs)
+reduceList op b l  = let v = red op b l
+                     in  op b v
 
-reduceListAux :: (a -> a -> a) -> [a] -> a
-reduceListAux op [x]            = x
--- reduceListAux op  =   
+red :: (a -> a -> a) -> a -> [a] -> a
+red op b [x] = x
+red op b l   = let l' = contract op l
+               in  red op b l'
 
+contract :: (a -> a -> a) -> [a] -> [a]
+contract op (x : y : zs) =  let (xy, r) = op x y ||| contract op zs
+                            in  xy : r
+contract _  l            =  l
+
+-- Ejemplos - BORRARLOS ------------------------------------------------
+concatStrings :: String -> String -> String
+concatStrings a b = "(" ++ a ++ " + " ++ b ++ ")"
+
+ejemploSeq :: [String]
+ejemploSeq = fromListList ["x0", "x1", "x2", "x3", "x4", "x5"]
+
+ejemploSeq' :: [String]
+ejemploSeq' = fromListList ["x0", "x1", "x2", "x3", "x4", "x5", "x6"]
+-- ---------------------------------------------------------------------
 
 -- ? Preguntar por orden de reduccion
 scanList :: (a -> a -> a) -> a -> [a] -> ([a], a)
-scanList = undefined
+scanList op b []   =  ([], b)
+scanList op b [x]  =  ([b], op b x)
+scanList op b l    =  let
+                        -- Contraigo l y llamo a scan recursivamente sobre la lista contraida
+                        l'       = contract op l
+                        (ls, lr) = scanList op b l'
+
+                        -- Uno el resultado de scan en una unica lista ls'
+                        ls' = appendList ls [lr]
+                        
+                        -- Expando a partir del operador, la lista original, el llamado recursivo
+                        -- y un indice inicial y la longitud final que debe tener el resultado
+                        r = expand op l ls' 0 (lengthList l + 1)
+
+                      in
+                        -- Separamos al resultado en dos partes acorde a la especificacion de scan
+                        separateScan r
+
+-- Si puede avanzar dos lo hace, devolviendo la lista vacia en caso de tener menos de dos elementos.
+advanceTwo :: [a] -> [a]
+advanceTwo (x : y : zs) = zs
+advanceTwo _            = []
+
+getFirst :: [a] -> a
+getFirst (x : xs) = x
+
+-- Dada una lista, la separa en una tupla (ls, v) donde ls son todos los elementos menos el ultimo, que es v.
+separateScan :: [a] -> ([a], a)
+separateScan [x]      = ([], x)
+separateScan (x : xs) = let (ls, v) = separateScan xs
+                        in  (x : ls, v)
+
+-- x:y:zs es la lista original, x':zs' es la contraida
+-- Termina cuando m es 0, es decir, ya se completo todo el resultado.
+expand :: (a -> a -> a) -> [a] -> [a] -> Int -> Int -> [a]
+expand _  _  _       _ 0 = []
+expand op s (x':xs') k m =
+  if even k then
+              x' : (expand op s (x':xs') (k + 1) (m - 1))
+            else
+              (op x' (getFirst s)) : (expand op (advanceTwo s) xs' (k + 1) (m - 1))
 
 -- * lista
 fromListList :: [a] -> [a]
