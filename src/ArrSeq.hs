@@ -116,23 +116,21 @@ scanArr op b s = case lengthArr s of
                  0    -> (emptyArr, b)
                  1    -> (singletonArr b, op b (nthArr s 0))
                  slen -> let
-                            -- Me quedo con la mitad de los indices
-                            idxArr = tabulateArr id (div slen 2)
-
                             -- Defino la operacion de contraccion a aplicar sobre esos indices
                             contraccion i = op (nthArr s (2 * i)) (nthArr s (2 * i + 1))
-                            arrContraido = mapArr contraccion idxArr
+
+                            -- Aplicamos contraccion a los indices de 0 a (slen / 2).
+                            arrContraido  = tabulateArr contraccion (div slen 2)
 
                             -- Llamo recursivamente a scan sobre el array contraido y lo uno en s'
-                            (ss, sr) = scanArr op b arrContraido
-                            s' = appendArr ss (singletonArr sr)
+                            (ss, sr)      = scanArr op b arrContraido
+                            s'            = appendArr ss (singletonArr sr)
 
-                            -- Genero un array de indices a partir del cual construyo el resultado con expansion
-                            rIdx = tabulateArr id (slen + 1)
-                            expansion i = if even i then nthArr s' (div i 2)
-                                                    else op (nthArr s' (div i 2)) (nthArr s (i - 1))
+                            -- Construyo a r por expansion sobre un Arr de indices de 0 a slen.
+                            expansion i   = if even i then nthArr s' (div i 2)
+                                                      else op (nthArr s' (div i 2)) (nthArr s (i - 1))
 
-                            r = mapArr expansion rIdx
+                            r             = tabulateArr expansion (slen + 1)
                           
                           in 
                             -- Separo el resultado final en dos acorde a la especificacion de scan.
