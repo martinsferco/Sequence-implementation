@@ -76,15 +76,11 @@ appendList = (++)
 
 -- * lista
 takeList :: [a] -> Int -> [a]
-takeList _ 0      = []
-takeList [] _     = []
-takeList (x:xs) n = x : (takeList xs (n-1))
+takeList xs k = take k xs
 
 -- * lista
 dropList :: [a] -> Int -> [a]
-dropList xs 0     = xs
-dropList [] _     = []
-dropList (x:xs) n = dropList xs (n-1)
+dropList xs k = drop k xs
 
 -- * lista
 showtList :: [a] -> TreeView a ([a])
@@ -108,9 +104,14 @@ joinList [xs] = xs
 joinList (xs:xss) = appendList xs (joinList xss)
 
 
--- ? Preguntar por orden de reduccion
+
 reduceList :: (a -> a -> a) -> a -> [a] -> a
-reduceList = undefined
+reduceList op b [] = b
+reduceList op b xs = op b (reduceListAux op xs)
+
+reduceListAux :: (a -> a -> a) -> [a] -> a
+reduceListAux op [x]            = x
+-- reduceListAux op  =   
 
 
 -- ? Preguntar por orden de reduccion
