@@ -108,10 +108,10 @@ reduceList op b [] = b
 reduceList op b l  = let v = red op b l
                      in  op b v
 
-red :: (a -> a -> a) -> a -> [a] -> a
-red op b [x] = x
-red op b l   = let l' = contract op l
-               in  red op b l'
+red :: (a -> a -> a) -> [a] -> a
+red op [x] = x
+red op l   = let l' = contract op l
+               in  red op l'
 
 contract :: (a -> a -> a) -> [a] -> [a]
 contract op (x : y : zs) =  let (xy, r) = op x y ||| contract op zs
