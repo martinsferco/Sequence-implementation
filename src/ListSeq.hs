@@ -105,13 +105,13 @@ joinList (xs:xss) = appendList xs (joinList xss)
 
 reduceList :: (a -> a -> a) -> a -> [a] -> a
 reduceList op b [] = b
-reduceList op b l  = let v = red op b l
+reduceList op b l  = let v = red op l
                      in  op b v
 
 red :: (a -> a -> a) -> [a] -> a
 red op [x] = x
 red op l   = let l' = contract op l
-               in  red op l'
+             in  red op l'
 
 contract :: (a -> a -> a) -> [a] -> [a]
 contract op (x : y : zs) =  let (xy, r) = op x y ||| contract op zs
@@ -135,12 +135,9 @@ scanList op b []   =  ([], b)
 scanList op b [x]  =  ([b], op b x)
 scanList op b l    =  let
                         -- Contraigo l y llamo a scan recursivamente sobre la lista contraida
-                        l'       = contract op l
-                        (ls, lr) = scanList op b l'
+                        l'  = contract op l
+                        ls' = scanWithoutSeparation op b l'
 
-                        -- Uno el resultado de scan en una unica lista ls'
-                        ls' = appendList ls [lr]
-                        
                         -- Expando a partir del operador, la lista original, el llamado recursivo
                         -- y un indice inicial y la longitud final que debe tener el resultado
                         r = expand op l ls' 0 (lengthList l + 1)
@@ -148,6 +145,16 @@ scanList op b l    =  let
                       in
                         -- Separamos al resultado en dos partes acorde a la especificacion de scan
                         separateScan r
+
+scanWithoutSeparation :: (a -> a -> a) -> a -> [a] -> [a]
+scanWithoutSeparation op b []  =  [b]
+scanWithoutSeparation op b [x] =  [b, op b x]
+scanWithoutSeparation op b l   =  let
+                                    l' = contract op l
+                                    ls' = scanWithoutSeparation op b l'
+                                  in 
+                                    expand op l ls' 0 (lengthList l + 1)
+
 
 -- Si puede avanzar dos lo hace, devolviendo la lista vacia en caso de tener menos de dos elementos.
 advanceTwo :: [a] -> [a]
@@ -168,10 +175,11 @@ separateScan (x : xs) = let (ls, v) = separateScan xs
 expand :: (a -> a -> a) -> [a] -> [a] -> Int -> Int -> [a]
 expand _  _  _       _ 0 = []
 expand op s (x':xs') k m =
-  if even k then
-              x' : (expand op s (x':xs') (k + 1) (m - 1))
+  if even k then x' : (expand op s (x':xs') (k + 1) (m - 1))
             else
-              (op x' (getFirst s)) : (expand op (advanceTwo s) xs' (k + 1) (m - 1))
+              let (operatedElements, recExpand) = op x' (getFirst s) |||
+                                                  expand op (advanceTwo s) xs' (k + 1) (m - 1)
+              in  operatedElements : recExpand
 
 -- * lista
 fromListList :: [a] -> [a]
