@@ -134,17 +134,11 @@ scanList :: (a -> a -> a) -> a -> [a] -> ([a], a)
 scanList op b []   =  ([], b)
 scanList op b [x]  =  ([b], op b x)
 scanList op b l    =  let
-                        -- Contraigo l y llamo a scan recursivamente sobre la lista contraida
-                        l'  = contract op l
-                        ls' = scanWithoutSeparation op b l'
-
-                        -- Expando a partir del operador, la lista original, el llamado recursivo
-                        -- y un indice inicial y la longitud final que debe tener el resultado
-                        r = expand op l ls' 0 (lengthList l + 1)
-
+                        -- Llamo a la funcion auxiliar que no hace separaciones innecesarias.
+                        l' = scanWithoutSeparation op b l
                       in
                         -- Separamos al resultado en dos partes acorde a la especificacion de scan
-                        separateScan r
+                        separateScan l'
 
 scanWithoutSeparation :: (a -> a -> a) -> a -> [a] -> [a]
 scanWithoutSeparation op b []  =  [b]
