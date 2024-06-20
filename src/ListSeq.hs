@@ -110,13 +110,13 @@ reduceList op b l  = let v = red op l
 
 red :: (a -> a -> a) -> [a] -> a
 red op [x] = x
-red op l   = let l' = contract op l
+red op l   = let l' = contractList op l
              in  red op l'
 
-contract :: (a -> a -> a) -> [a] -> [a]
-contract op (x : y : zs) =  let (xy, r) = op x y ||| contract op zs
+contractList :: (a -> a -> a) -> [a] -> [a]
+contractList op (x : y : zs) =  let (xy, r) = op x y ||| contractList op zs
                             in  xy : r
-contract _  l            =  l
+contractList _  l            =  l
 
 -- Ejemplos - BORRARLOS ------------------------------------------------
 concatStrings :: String -> String -> String
@@ -144,7 +144,7 @@ scanWithoutSeparation :: (a -> a -> a) -> a -> [a] -> [a]
 scanWithoutSeparation op b []  =  [b]
 scanWithoutSeparation op b [x] =  [b, op b x]
 scanWithoutSeparation op b l   =  let
-                                    l' = contract op l
+                                    l' = contractList op l
                                     ls' = scanWithoutSeparation op b l'
                                   in 
                                     expand op l ls' 0 (lengthList l + 1)
