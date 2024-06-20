@@ -106,13 +106,13 @@ reduceArr op b ar = if lengthArr ar == 0 then b else op b (reduceArrAux op ar)
 
 reduceArrAux :: (a -> a -> a) -> Arr a -> a
 reduceArrAux op ar | l == 1    = nthArr ar 0
-                   | otherwise = reduceArrAux op (contract op ar)
+                   | otherwise = reduceArrAux op (contractArr op ar)
 
                    where l = lengthArr ar
 
-contract :: (a -> a -> a) -> Arr a -> Arr a
-contract op ar | even l    = tabulateArr (\i -> opi i) (div l 2)
-               | otherwise = tabulateArr (\i -> function i) (div l 2 + 1)
+contractArr :: (a -> a -> a) -> Arr a -> Arr a
+contractArr op ar | even l    = tabulateArr opi      (div l 2)
+               | otherwise = tabulateArr function (div l 2 + 1)
     
     where
       opi i = op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))   
@@ -128,7 +128,7 @@ scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scanArr op b s | lengthArr s == 0 = (emptyArr,b) 
                | lengthArr s == 1 = (singletonArr b, op b (nthArr s 0))
                | otherwise         = let
-                                        sc         = contract op s
+                                        sc        = contractArr op s
                                         (ss, ts)  = scanArr op b sc
                                         s'        = appendArr ss (singletonArr ts)
                                         expand i  = if even i then nthArr s' (div i 2) else op (nthArr s' (div i 2)) (nthArr s (i - 1))
