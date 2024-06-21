@@ -27,31 +27,30 @@ instance Seq Arr where
   fromList   = fromListArr
 
 
--- * lista
 emptyArr :: Arr a
 emptyArr = A.empty
 
--- * lista
+
 singletonArr :: a -> Arr a
 singletonArr x = A.fromList [x]
 
--- * lista
+
 lengthArr :: Arr a -> Int
 lengthArr = A.length
 
--- * lista
+
 nthArr :: Arr a -> Int -> a
 nthArr ar i = ar ! i
 
--- * lista
+
 tabulateArr :: (Int -> a) -> Int -> Arr a 
 tabulateArr = A.tabulate
 
--- * lista
+
 mapArr :: (a -> b) -> Arr a -> Arr b
 mapArr f ar = tabulateArr (\i -> f (nthArr ar i)) (lengthArr ar)  
 
--- * lista
+
 filterArr :: (a -> Bool) -> Arr a -> Arr a
 filterArr p ar = case showtArr ar of
                   EMPTY     -> emptyArr
@@ -59,7 +58,7 @@ filterArr p ar = case showtArr ar of
                   NODE l r  -> let (l', r') = filterArr p l ||| filterArr p r
                                in  appendArr l' r'
 
--- * lista
+
 appendArr :: Arr a -> Arr a -> Arr a
 appendArr ar1 ar2 = tabulateArr appendAux (l1 + l2)
 
@@ -76,6 +75,7 @@ takeArr ar k | k < 0     = emptyArr
 
              where l = lengthArr ar
 
+
 dropArr :: Arr a -> Int -> Arr a
 dropArr ar k | k < 0     = ar
              | k > l     = emptyArr
@@ -83,7 +83,7 @@ dropArr ar k | k < 0     = ar
 
              where l = lengthArr ar
 
--- * lista
+
 showtArr :: Arr a -> TreeView a (Arr a)
 showtArr ar = case lengthArr ar of
                   0 -> EMPTY
@@ -93,15 +93,16 @@ showtArr ar = case lengthArr ar of
                        in
                           NODE (takeArr ar s) (dropArr ar s)
 
--- * lista
+
 showlArr :: Arr a -> ListView a (Arr a)
 showlArr ar = case lengthArr ar of 
                   0 -> NIL
                   k -> CONS (nthArr ar 0) (dropArr ar 1)
 
--- * lista
+
 joinArr :: Arr (Arr a) -> Arr a
 joinArr = A.flatten
+
 
 reduceArr :: (a -> a -> a) -> a -> Arr a -> a
 reduceArr op b ar = if lengthArr ar == 0 then b else op b (reduceArrAux op ar)
@@ -112,6 +113,7 @@ reduceArrAux op ar | l == 1    = nthArr ar 0
                    | otherwise = reduceArrAux op (contractArr op ar)
 
                    where l = lengthArr ar
+
 
 contractArr :: (a -> a -> a) -> Arr a -> Arr a
 contractArr op ar | even l    = tabulateArr opi      (div l 2)
@@ -124,23 +126,22 @@ contractArr op ar | even l    = tabulateArr opi      (div l 2)
                                   else nthArr ar (2 * i)
 
 
-
 scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scanArr op b s | lengthArr s == 0 = (emptyArr,b) 
                | lengthArr s == 1 = (singletonArr b, op b (nthArr s 0))
                | otherwise         = let
-                                        sc            = contractArr op s
-                                        (ss, ts)      = scanArr op b sc
-                                        s'            = appendArr ss (singletonArr ts)
+                                        sc            = contractArr op s                          -- contraemos la entrada
+                                        (ss, ts)      = scanArr op b sc                           -- llamamos recursivamente
+                                        s'            = appendArr ss (singletonArr ts)       
                                         
                                         expandArr i   = if even i then nthArr s' (div i 2)
                                                                   else op (nthArr s' (div i 2))
                                                                           (nthArr s (i - 1))
-                                        r             = tabulateArr expandArr (lengthArr s + 1)
+
+                                        r             = tabulateArr expandArr (lengthArr s + 1)   -- expandimos el resultado
                                       in
-                                        (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1))
+                                        (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1)) -- dividimos el resultado
 
 
--- * lista
 fromListArr :: [a] -> Arr a
 fromListArr = A.fromList
