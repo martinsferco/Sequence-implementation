@@ -4,9 +4,7 @@ import Seq
 import Par 
 
 import qualified Arr as A
-import Arr ((!))
-import Arr (Arr, fromList) 
-import Data.List (singleton)
+import Arr (Arr, fromList, (!)) 
 
 
 instance Seq Arr where
@@ -71,14 +69,19 @@ appendArr ar1 ar2 = tabulateArr appendAux (l1 + l2)
                               else nthArr ar2 (i - l1)
 
 
-
--- !! corregir
 takeArr :: Arr a -> Int -> Arr a
-takeArr ar k = A.subArray 0 k ar 
+takeArr ar k | k < 0     = emptyArr
+             | k > l     = ar
+             | otherwise = A.subArray 0 k ar
 
--- !! corregir
+             where l = lengthArr ar
+
 dropArr :: Arr a -> Int -> Arr a
-dropArr ar k = A.subArray k (lengthArr ar - k) ar 
+dropArr ar k | k < 0     = ar
+             | k > l     = emptyArr
+             | otherwise = A.subArray k (lengthArr ar - k) ar 
+
+             where l = lengthArr ar
 
 -- * lista
 showtArr :: Arr a -> TreeView a (Arr a)
@@ -112,15 +115,13 @@ reduceArrAux op ar | l == 1    = nthArr ar 0
 
 contractArr :: (a -> a -> a) -> Arr a -> Arr a
 contractArr op ar | even l    = tabulateArr opi      (div l 2)
-               | otherwise = tabulateArr function (div l 2 + 1)
+                  | otherwise = tabulateArr oddOpi (div l 2 + 1)
     
     where
       opi i = op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))   
       l = lengthArr ar
-      function i = if i /= div l 2  then opi i
-                                    else nthArr ar (2 * i)
-
-
+      oddOpi i = if i /= div l 2  then opi i
+                                  else nthArr ar (2 * i)
 
 
 
@@ -138,13 +139,6 @@ scanArr op b s | lengthArr s == 0 = (emptyArr,b)
                                         r             = tabulateArr expandArr (lengthArr s + 1)
                                       in
                                         (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1))
-
-
-s = fromListArr ["s0","s1","s2","s3","s4","s5"]
-
-b = "b"
-op n m = "(" ++ n ++ "+" ++ m ++ ")"
-
 
 
 -- * lista
