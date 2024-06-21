@@ -128,11 +128,14 @@ scanArr :: (a -> a -> a) -> a -> Arr a -> (Arr a, a)
 scanArr op b s | lengthArr s == 0 = (emptyArr,b) 
                | lengthArr s == 1 = (singletonArr b, op b (nthArr s 0))
                | otherwise         = let
-                                        sc        = contractArr op s
-                                        (ss, ts)  = scanArr op b sc
-                                        s'        = appendArr ss (singletonArr ts)
-                                        expand i  = if even i then nthArr s' (div i 2) else op (nthArr s' (div i 2)) (nthArr s (i - 1))
-                                        r         = tabulateArr expand (lengthArr s + 1)
+                                        sc            = contractArr op s
+                                        (ss, ts)      = scanArr op b sc
+                                        s'            = appendArr ss (singletonArr ts)
+                                        
+                                        expandArr i   = if even i then nthArr s' (div i 2)
+                                                                  else op (nthArr s' (div i 2))
+                                                                          (nthArr s (i - 1))
+                                        r             = tabulateArr expandArr (lengthArr s + 1)
                                       in
                                         (takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1))
 

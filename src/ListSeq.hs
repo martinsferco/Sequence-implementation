@@ -121,23 +121,13 @@ contractListLen op (x : y : zs) =  let (xy, (r, len)) = op x y ||| contractListL
 contractListLen _  l@[x]        =  (l,  1)
 contractListLen _  []           =  ([], 0)
 
--- Ejemplos - BORRARLOS ------------------------------------------------
-concatStrings :: String -> String -> String
-concatStrings a b = "(" ++ a ++ " + " ++ b ++ ")"
 
-ejemploSeq :: [String]
-ejemploSeq = fromListList ["x0", "x1", "x2", "x3", "x4", "x5"]
-
-ejemploSeq' :: [String]
-ejemploSeq' = fromListList ["x0", "x1", "x2", "x3", "x4", "x5", "x6"]
--- ---------------------------------------------------------------------
-
--- ? Preguntar por orden de reduccion
+-- * lista
 scanList :: (a -> a -> a) -> a -> [a] -> ([a], a)
 scanList op b []   =  ([], b)
 scanList op b [x]  =  ([b], op b x)
 scanList op b l    =  let
-                        -- Llamo a la funcion auxiliar que no hace separaciones innecesarias.
+                        -- Llamamos a la funcion auxiliar que no hace separaciones innecesarias.
                         l' = scanWithoutSeparation op b l
                       in
                         -- Separamos al resultado en dos partes acorde a la especificacion de scan
@@ -150,10 +140,24 @@ scanWithoutSeparation op b l   =  let
                                     (l', len) = contractListLen op l
                                     ls' = scanWithoutSeparation op b l'
                                   in 
-                                    expand op l ls' 0 (len + 1)
+                                    expandList op l ls' 0 (len + 1)
 
 
--- Si puede avanzar dos lo hace, devolviendo la lista vacia en caso de tener menos de dos elementos.
+
+expandList :: (a -> a -> a) -> [a] -> [a] -> Int -> Int -> [a]
+expandList _  _  _       _ 0 = []
+expandList op s (x':xs') k m =
+  if even k then x' : (expandList op s (x':xs') (k + 1) (m - 1))
+            else
+              let (operatedElements, recExpand) = op x' (getFirst s) |||
+                                                  expandList op (advanceTwo s) xs' (k + 1) (m - 1)
+              in  operatedElements : recExpand
+
+separateScan :: [a] -> ([a], a)
+separateScan [x]      = ([], x)
+separateScan (x : xs) = let (ls, v) = separateScan xs
+                        in  (x : ls, v)
+
 advanceTwo :: [a] -> [a]
 advanceTwo (x : y : zs) = zs
 advanceTwo _            = []
@@ -161,23 +165,19 @@ advanceTwo _            = []
 getFirst :: [a] -> a
 getFirst (x : xs) = x
 
--- Dada una lista, la separa en una tupla (ls, v) donde ls son todos los elementos menos el ultimo, que es v.
-separateScan :: [a] -> ([a], a)
-separateScan [x]      = ([], x)
-separateScan (x : xs) = let (ls, v) = separateScan xs
-                        in  (x : ls, v)
-
--- x:y:zs es la lista original, x':zs' es la contraida
--- Termina cuando m es 0, es decir, ya se completo todo el resultado.
-expand :: (a -> a -> a) -> [a] -> [a] -> Int -> Int -> [a]
-expand _  _  _       _ 0 = []
-expand op s (x':xs') k m =
-  if even k then x' : (expand op s (x':xs') (k + 1) (m - 1))
-            else
-              let (operatedElements, recExpand) = op x' (getFirst s) |||
-                                                  expand op (advanceTwo s) xs' (k + 1) (m - 1)
-              in  operatedElements : recExpand
-
 -- * lista
 fromListList :: [a] -> [a]
 fromListList = id
+
+
+
+-- Ejemplos - BORRARLOS ------------------------------------------------
+concatStrings :: String -> String -> String
+concatStrings a b = "(" ++ a ++ " + " ++ b ++ ")"
+
+ejemploSeq :: [String]
+ejemploSeq = fromListList ["x0", "x1", "x2", "x3", "x4", "x5"]
+
+ejemploSeq' :: [String]
+ejemploSeq' = fromListList ["x0", "x1", "x2", "x3", "x4", "x5", "x6"]
+-- ---------------------------------------------------------------------
