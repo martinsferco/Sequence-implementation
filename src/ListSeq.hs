@@ -113,6 +113,7 @@ red op [x] = x
 red op l   = let l' = fst (contractListLen op l)
              in  red op l'
 
+
 -- contractListLen devuelve la lista contraida y la longitud de la lista original
 --  (la longitud es util para scan, no asi para reduce, donde la ignoraremos)
 contractListLen :: (a -> a -> a) -> [a] -> ([a], Int)
