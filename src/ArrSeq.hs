@@ -140,7 +140,7 @@ scanArr op b s | lengthArr s == 0 = (emptyArr,b)
 
                                       r             = tabulateArr expandArr (lengthArr s + 1)   -- expandimos el resultado
                                     in
-                                      takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1)) -- dividimos el resultado
+                                      takeArr r (lengthArr r - 1), nthArr r (lengthArr r - 1)   -- dividimos el resultado
 
 
 fromListArr :: [a] -> Arr a
