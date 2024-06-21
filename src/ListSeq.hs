@@ -110,13 +110,16 @@ reduceList op b l  = let v = red op l
 
 red :: (a -> a -> a) -> [a] -> a
 red op [x] = x
-red op l   = let l' = contractList op l
+red op l   = let l' = fst (contractListLen op l)
              in  red op l'
 
-contractList :: (a -> a -> a) -> [a] -> [a]
-contractList op (x : y : zs) =  let (xy, r) = op x y ||| contractList op zs
-                            in  xy : r
-contractList _  l            =  l
+-- contractListLen devuelve la lista contraida y la longitud de la lista original
+--  (la longitud es util para scan, no asi para reduce, donde la ignoraremos)
+contractListLen :: (a -> a -> a) -> [a] -> ([a], Int)
+contractListLen op (x : y : zs) =  let (xy, (r, len)) = op x y ||| contractListLen op zs
+                                   in  (xy : r, len + 2)
+contractListLen _  l@[x]        =  (l,  1)
+contractListLen _  []           =  ([], 0)
 
 -- Ejemplos - BORRARLOS ------------------------------------------------
 concatStrings :: String -> String -> String
@@ -144,10 +147,10 @@ scanWithoutSeparation :: (a -> a -> a) -> a -> [a] -> [a]
 scanWithoutSeparation op b []  =  [b]
 scanWithoutSeparation op b [x] =  [b, op b x]
 scanWithoutSeparation op b l   =  let
-                                    l' = contractList op l
+                                    (l', len) = contractListLen op l
                                     ls' = scanWithoutSeparation op b l'
                                   in 
-                                    expand op l ls' 0 (lengthList l + 1)
+                                    expand op l ls' 0 (len + 1)
 
 
 -- Si puede avanzar dos lo hace, devolviendo la lista vacia en caso de tener menos de dos elementos.
