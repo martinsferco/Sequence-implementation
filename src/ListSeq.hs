@@ -54,7 +54,7 @@ tabulateList f k = tabulateListAux f k 0
 
 
 mapList :: (a -> b) -> [a] -> [b]
-mapList f [] = []
+mapList f []     = []
 mapList f (x:xs) = let
                       (fx, fxs) = f x ||| mapList f xs
                    in
@@ -62,7 +62,7 @@ mapList f (x:xs) = let
 
 
 filterList :: (a -> Bool) -> [a] -> [a]
-filterList p [] = []
+filterList p []     = []
 filterList p (x:xs) = let
                          (px, pxs) = p x ||| filterList p xs
                       in
@@ -92,13 +92,13 @@ showtList xs  = let
 
 
 showlList :: [a] -> ListView a ([a])
-showlList [] = NIL
+showlList []     = NIL
 showlList (x:xs) = CONS x xs
 
 
 joinList :: [[a]] -> [a]
-joinList [] = []
-joinList [xs] = xs
+joinList []       = []
+joinList [xs]     = xs
 joinList (xs:xss) = appendList xs (joinList xss)
 
 
@@ -139,7 +139,7 @@ scanWithoutSeparation op b []  =  [b]
 scanWithoutSeparation op b [x] =  [b, op b x]
 scanWithoutSeparation op b l   =  let
                                     (l', len) = contractListLen op l
-                                    ls' = scanWithoutSeparation op b l'
+                                    ls'       = scanWithoutSeparation op b l'
                                   in 
                                     expandList op l ls' 0 (len + 1)
 

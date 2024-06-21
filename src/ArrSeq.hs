@@ -120,9 +120,9 @@ contractArr op ar | even l    = tabulateArr opi      (div l 2)
                   | otherwise = tabulateArr oddOpi (div l 2 + 1)
     
     where
-      opi i = op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))   
-      l = lengthArr ar
-      oddOpi i = if i /= div l 2  then opi i
+      opi i     = op (nthArr ar (2 * i)) (nthArr ar (2 * i + 1))   
+      l         = lengthArr ar
+      oddOpi i  = if i /= div l 2 then opi i
                                   else nthArr ar (2 * i)
 
 
